@@ -36,18 +36,21 @@ int main() {
 	gp << "set xrange [-2:24]\n set logscale y 10\n set xlabel 'Eb/N0'\n set ylabel 'BER'\n set title 'Performance analysis of MPSK over AWGN'\n";
 	for (short m = 0; m < 5; m++) {
 		short nByts = log2(arrayOfM[m]);
+		vector<double> EsN0dBs;
+		for (short i = 0; i < EbN0dBs.size(); i++) {
+			EsN0dBs.push_back(10*log10(nByts)+ EbN0dBs[i]);
+		}
 		uniform_int_distribution<> distr(0, arrayOfM[m]-1);
 		vector<short> inputSyms;
 		for (unsigned int i = 0; i < nSym; i++) {
 			inputSyms.push_back(distr(gen));
-			//cout << inputSyms[i] << "  ";
 		}
 		cout << endl;
 		mpsk_modem modem = mpsk_modem(arrayOfM[m]);
 		vector<complex<double>> modulatedSyms = modem.modulate(inputSyms);
 		vector<double> BER; 
-		for (short j = 0; j < EbN0dBs.size(); j++) {
-			vector<complex<double>> receivedSyms = modem.awgn(modulatedSyms, EbN0dBs[j]);
+		for (short j = 0; j < EsN0dBs.size(); j++) {
+			vector<complex<double>> receivedSyms = modem.awgn(modulatedSyms, EsN0dBs[j]);
 			vector<short> detectedSyms = modem.demodulate(receivedSyms);
 			unsigned int sum = 0;
 			for (unsigned int i = 0; i < detectedSyms.size(); i++) {
